@@ -38,7 +38,7 @@ class RSSFeed {
         'feeds'             => array( 'http://allvoices.com/hub/118/feed.xml' ), // An array of default feeds
         'post_category'     => array( 0 ), // The category to assign to posts (empty array for none)
         'post_author'       => 1, // The author to assign to posts
-        'post_status'       => 'publish', // The post status after it has been imported
+        'post_status'       => 'draft', // The post status after it has been imported
         'enclosures'        => true, // Process enclosures
 
         '_times_run'        => 0, // Internal: amount of times it has run
