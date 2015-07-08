@@ -494,7 +494,7 @@ if ( defined('WP_CLI') && WP_CLI ) {
 
         /**
          * Lists all feeds
-         * @subcommand list
+         * @subcommand feed-list
          */
         public function _list($args) {
             $rss = $this->rss;
@@ -516,7 +516,7 @@ if ( defined('WP_CLI') && WP_CLI ) {
          * <feed-index>
          * : The id of the feed as seen in wp rss list.
          *
-         * @subcommand delete
+         * @subcommand feed-delete
          */
         public function _remove($args) {
             $rss = $this->rss;
@@ -536,7 +536,7 @@ if ( defined('WP_CLI') && WP_CLI ) {
          * <feed-uri>
          * : The URI of the feed to add. It will not be checked so make sure it works!
          *  
-         * @subcommand add
+         * @subcommand feed-add
          */
         public function _add($args) {
             $rss = $this->rss;
@@ -556,7 +556,7 @@ if ( defined('WP_CLI') && WP_CLI ) {
          * : The id of the feed as seen in wp rss list.
          *
          * @synopsis [<feed-index>]
-         * @subcommand fetch
+         * @subcommand feed-fetch
          */
         public function _fetch($args) {
             $rss = $this->rss;
@@ -571,7 +571,7 @@ if ( defined('WP_CLI') && WP_CLI ) {
         /**
          * Resets the settings for a fresh start
          *
-         * @subcommand reset
+         * @subcommand reset-database
          */
         public function _reset($args) {
             $rss = $this->rss;
@@ -590,7 +590,7 @@ if ( defined('WP_CLI') && WP_CLI ) {
          * : The id of the feed as seen in wp rss list.
          *
          * @synopsis <feed-index>
-         * @subcommand codes
+         * @subcommand get-codes
          */
         public function _codes($args) {
             $rss = $this->rss;
@@ -603,6 +603,35 @@ if ( defined('WP_CLI') && WP_CLI ) {
                 $managed_in_database = !!$managed_id ? "Managed ($managed_id)":"Not managed";
 
                 WP_CLI::line("- $code: $managed_in_database: $post_title");
+            endforeach;
+
+            return $codes;
+        }
+
+        /**
+         * Removes all managed posts
+         *
+         * ## OPTIONS
+         *
+         * <feed-id>
+         * : The id of the feed as seen in wp rss list.
+         *
+         * @synopsis <feed-index>
+         * @subcommand remove-posts
+         */
+        public function _remove_posts($args) {
+            $rss = $this->rss;
+            list( $feed_index ) = $args;
+
+            $codes = $rss->get_codes($feed_index);
+
+            foreach ($codes as $code => $post_title):
+                $managed_id = $rss->find_managed_post($code);
+                
+                if ( wp_delete_post( $managed_id, true ) )
+                    WP_CLI::line("- successfully deleted post $managed_id");
+                else 
+                    WP_CLI::line("- error deleting post $managed_id");
             endforeach;
 
             return $codes;
