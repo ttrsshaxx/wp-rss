@@ -199,10 +199,13 @@ class RSSFeed {
 
         $post_id = $this->find_managed_post($post_data['post_meta']['_rssff_id']);
 
+        $post_meta = $post_data['post_meta'];
+
         if ( ! $post_id ):
 
             $post_id = wp_insert_post($post_data);
 
+            //echo $post_meta['_rssff_image'];
             if (isset($post_meta['_rssff_image'])):
                 $this->save_image($post_id, $post_meta['_rssff_image']);
             endif;
@@ -213,6 +216,10 @@ class RSSFeed {
 
             $post_data['ID'] = $post_id;
             $post_id = wp_update_post($post_data);
+
+            if (!has_post_thumbnail($post_id) && isset($post_meta['_rssff_image'])):
+                $this->save_image($post_id, $post_meta['_rssff_image']);
+            endif;  
 
             $this->log("Updated post id: $post_id");
 
@@ -390,8 +397,8 @@ if (!function_exists('rsff_default_author_name')) {
 }
 
 
-if (!function_exists('rsff_default_image')) {
-    function rsff_default_image($post_to_insert, $feed_item) {
+if (!function_exists('rssff_default_image')) {
+    function rssff_default_image($post_to_insert, $feed_item) {
 
         $enclosure = $feed_item->get_enclosure();
         $raw_link = $enclosure->get_link();
@@ -400,12 +407,12 @@ if (!function_exists('rsff_default_image')) {
         if (substr($raw_link, 0, 28) == 'http://www.allvoices.comhttp') $raw_link = substr($raw_link, 24);
 
         $post_to_insert['post_meta']['_rssff_image'] = $raw_link;
-
+        //echo $raw_link;
         return $post_to_insert;
     }
 }
 
-add_filter('rssff_fetch_post', 'rsff_default_image', 10, 2);
+add_filter('rssff_fetch_post', 'rssff_default_image', 10, 2);
 
 if (!function_exists('rssff_default_item_content')) {
     function rssff_default_item_content($feed_item)
@@ -457,7 +464,7 @@ if (!function_exists('rssff_default_fetch')) {
                 $post_to_insert['post_meta']['_rssff_source'] = $feed_uri;
 
                 $post_to_insert = apply_filters('rssff_fetch_post', $post_to_insert, $item);
-
+                //var_dump($post_to_insert);
                 array_push($return, $post_to_insert);
             endforeach;
         endif;
@@ -494,7 +501,7 @@ if ( defined('WP_CLI') && WP_CLI ) {
 
             $feeds = $rss->get_feeds();
 
-            foreach (array_keys($feeds) as $feed_index):
+            foreach (array_keys((array)$feeds) as $feed_index):
                 WP_CLI::line("- $feed_index: $feeds[$feed_index]");
             endforeach;
 
@@ -506,10 +513,9 @@ if ( defined('WP_CLI') && WP_CLI ) {
          *
          * ## OPTIONS
          *
-         * <feed-id>
+         * <feed-index>
          * : The id of the feed as seen in wp rss list.
          *
-         * @synopsis feed-id
          * @subcommand delete
          */
         public function _remove($args) {
@@ -529,8 +535,7 @@ if ( defined('WP_CLI') && WP_CLI ) {
          *
          * <feed-uri>
          * : The URI of the feed to add. It will not be checked so make sure it works!
-         *
-         * @synopsis feed-uri
+         *  
          * @subcommand add
          */
         public function _add($args) {
