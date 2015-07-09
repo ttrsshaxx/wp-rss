@@ -370,6 +370,7 @@ class RSSFeed {
         // Check for download errors
         if ( is_wp_error( $tmp ) )
         {
+            throw new Exception($tmp->get_error_message());
             return $tmp;
         }
 
