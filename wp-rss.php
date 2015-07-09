@@ -47,7 +47,6 @@ class RSSFeed {
         '_option_name'      => 'rssff_options' // Internal: option name on the database
     );
 
-
     public function __construct() {
         // Fetch the settings and place them as an instance variable later use
         $this->settings = $this->getConfiguration();
@@ -58,6 +57,18 @@ class RSSFeed {
     public function __destruct() {
         $this->log('Destructing RSSFeed object');
     }
+
+
+
+    /***
+     * A stub that sanitizes an option before setting
+     * @return string
+     */
+    public function sanitizeOption($option, $value) {
+        return json_decode($value);
+    }
+
+
 
     /***
      * Configurable logging function (to configure when using with WPCLI)
@@ -92,11 +103,22 @@ class RSSFeed {
      *
      * @return bool
      */
-    public function save() {
+    public function saveAndExit() {
         $settings = $this->settings;
+
         $settings['_times_run']++;
         $settings['_last_run'] = time();
 
+        return $this->saveConfiguration($settings);
+    }
+
+    /***
+     * Save the settings object to the database 
+     * @return bool
+     */ 
+
+    public function saveConfiguration($settings) {
+        $settings = $this->settings;
         $option = $settings['_option_name'];
 
         return update_option($option, $settings);
@@ -117,7 +139,7 @@ class RSSFeed {
         else
             $this->log('Failure to add feed');
 
-        $this->save();
+        $this->saveAndExit();
 
         return $return;
     }
@@ -167,7 +189,7 @@ class RSSFeed {
         else
             $this->log('Failure to remove feed');
 
-        $this->save();
+        $this->saveAndExit();
 
         return !!$return;
     }
@@ -277,7 +299,7 @@ class RSSFeed {
      *
      * @return array
      */
-    private function getConfiguration() {
+    public function getConfiguration() {
 
         // Fetch the defaults and the option from the database
         $defaults = $this->default_settings;
@@ -635,6 +657,50 @@ if ( defined('WP_CLI') && WP_CLI ) {
             endforeach;
 
             return $codes;
+        }
+
+
+        /**
+         * Configure
+         *
+         * @subcommand configure
+         */
+        public function _configure($args, $assoc_args) {
+            $rss = $this->rss;
+            $settings = $rss->getConfiguration();
+
+            if (array_key_exists('show', $assoc_args)) {
+                foreach ($settings as $setting => $value) {
+                    WP_CLI::line("$setting: " . json_encode($value) );
+                }
+
+                return $settings;
+            }
+
+
+            foreach ($assoc_args as $parameter => $value) {
+
+                if (!isset($settings[$parameter])) {
+                    throw new Exception('There is no parameter by the name ' . $parameter);
+                }
+
+                else {
+                    
+                    $val = $rss->sanitizeOption($parameter, $value);
+                    
+                    $settings[$parameter] = $val;
+
+
+                    WP_CLI::line("Successfully changed $parameter to $val" );
+                }
+
+            }
+
+            
+            $rss->saveConfiguration($settings);
+
+            return $settings;
+            
         }
     }
 
