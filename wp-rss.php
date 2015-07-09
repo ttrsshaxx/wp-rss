@@ -333,7 +333,9 @@ class RSSFeed {
         $query_args = array(
             'post_type'     => 'post',
             'meta_key'      => '_rssff_id',
-            'meta_value'    => $private_key
+            'meta_value'    => $private_key,
+            'post_status'   => 'any'
+
         );
 
         $posts = (array)get_posts($query_args);
