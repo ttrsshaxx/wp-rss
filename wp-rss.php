@@ -395,7 +395,9 @@ class RSSFeed {
         // Check for handle sideload errors:
         if ( is_wp_error( $attachment_id ) )
         {
+
             @unlink( $file_array['tmp_name'] );
+            throw new Exception($attachment_id->get_error_message());
             return $attachment_id;
         }
 
