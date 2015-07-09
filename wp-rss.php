@@ -227,14 +227,10 @@ class RSSFeed {
 
             $post_id = wp_insert_post($post_data);
 
-            $this->log("Created post id: $post_id. " . ($attachment_id ? "Attachment id: " . $attachment_id: 'Didn\'t set attachment id') );
-
         else:
 
             $post_data['ID'] = $post_id;
             $post_id = wp_update_post($post_data);            
-
-            $this->log("Updated post id: $post_id. " . ($attachment_id ? "Attachment id: " . $attachment_id: 'Didn\'t set attachment id') );
 
         endif;
 
@@ -242,6 +238,7 @@ class RSSFeed {
             $attachment_id = $this->save_image($post_id, $post_meta['_rssff_image']);
         endif;  
 
+        $this->log("Updated post id: $post_id. " . ($attachment_id ? "Attachment id: " . $attachment_id: 'Didn\'t set attachment') );
         $post_meta =  $post_data['post_meta'];
 
         if ( $post_meta ):
