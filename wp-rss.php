@@ -232,7 +232,7 @@ class RSSFeed {
                 $attachment_id = $this->save_image($post_id, $post_meta['_rssff_image']);
             endif;
 
-            $this->log("Created post id: $post_id. " . $attachment_id ? "Attachment id: " . $attachment_id: '' );
+            $this->log("Created post id: $post_id. " . ($attachment_id ? "Attachment id: " . $attachment_id: '') );
 
         else:
 
@@ -243,7 +243,7 @@ class RSSFeed {
                 $attachment_id = $this->save_image($post_id, $post_meta['_rssff_image']);
             endif;  
 
-            $this->log("Updated post id: $post_id. " . $attachment_id ? "Attachment id: " . $attachment_id: '');
+            $this->log("Updated post id: $post_id. " . ($attachment_id ? "Attachment id: " . $attachment_id: '') );
 
         endif;
 
