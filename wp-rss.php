@@ -238,12 +238,9 @@ class RSSFeed {
             $attachment_id = $this->save_image($post_id, $post_meta['_rssff_image']);
         endif;  
 
-        var_dump($attachment_id);
-        var_dump(absint($attachment_id));
+        $saved_image = update_post_meta( $post_id, '_thumbnail_id', $attachment_id );
 
-        $attachment_id = update_post_meta( $post_id, '_thumbnail_id', $attachment_id );
-
-        $this->log("Updated post id: $post_id. " . ($attachment_id ? "Attachment id: " . $attachment_id: 'Didn\'t set attachment') );
+        $this->log("Updated post id: $post_id. " . ($saved_image ? "Attachment id: " . $attachment_id: 'Didn\'t set attachment') );
         $post_meta =  $post_data['post_meta'];
 
         if ( $post_meta ):
