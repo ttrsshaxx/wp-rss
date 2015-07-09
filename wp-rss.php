@@ -229,10 +229,10 @@ class RSSFeed {
 
             //echo $post_meta['_rssff_image'];
             if (isset($post_meta['_rssff_image'])):
-                $this->save_image($post_id, $post_meta['_rssff_image']);
+                $attachment_id = $this->save_image($post_id, $post_meta['_rssff_image']);
             endif;
 
-            $this->log("Created post id: $post_id");
+            $this->log("Created post id: $post_id. " . $attachment_id ? "Attachment id: " . $attachment_id: '' );
 
         else:
 
@@ -240,10 +240,10 @@ class RSSFeed {
             $post_id = wp_update_post($post_data);
 
             if (!has_post_thumbnail($post_id) && isset($post_meta['_rssff_image'])):
-                $this->save_image($post_id, $post_meta['_rssff_image']);
+                $attachment_id = $this->save_image($post_id, $post_meta['_rssff_image']);
             endif;  
 
-            $this->log("Updated post id: $post_id");
+            $this->log("Updated post id: $post_id. " . $attachment_id ? "Attachment id: " . $attachment_id: '');
 
         endif;
 
