@@ -478,6 +478,7 @@ if (!function_exists('rssff_default_fetch')) {
                 // Meta
                 $post_to_insert['post_meta'] = array();
                 $post_to_insert['post_meta']['rssff_author'] = rsff_default_author_name($item);
+                $post_to_insert['post_meta']['author_name'] = $post_to_insert['post_meta']['rssff_author'];
                 $post_to_insert['post_meta']['_rssff_id'] = md5($item->get_id());
                 $post_to_insert['post_meta']['_rssff_source'] = $feed_uri;
 
