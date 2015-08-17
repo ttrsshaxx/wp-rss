@@ -227,6 +227,24 @@ class RSSFeed {
 
             $post_id = wp_insert_post($post_data);
 
+            if (!has_post_thumbnail($post_id) && isset($post_meta['_rssff_image'])):
+                $attachment_id = $this->save_image($post_id, $post_meta['_rssff_image']);
+                $saved_image = update_post_meta( $post_id, '_thumbnail_id', $attachment_id );
+            endif;  
+
+            
+            $post_meta =  $post_data['post_meta'];
+
+            if ( $post_meta ):
+
+                foreach ($post_meta as $meta_key => $meta_value):
+                    if (! add_post_meta($post_id, $meta_key, $meta_value, true) )
+                        update_post_meta($post_id, $meta_key, $meta_value);
+                endforeach;
+
+            endif;
+
+
         else:
 
             $post_data['ID'] = $post_id;
@@ -234,23 +252,8 @@ class RSSFeed {
 
         endif;
 
-        if (!has_post_thumbnail($post_id) && isset($post_meta['_rssff_image'])):
-            $attachment_id = $this->save_image($post_id, $post_meta['_rssff_image']);
-            $saved_image = update_post_meta( $post_id, '_thumbnail_id', $attachment_id );
-        endif;  
-
         $this->log("Updated post id: $post_id. " . ($saved_image ? "Attachment id: " . $attachment_id: 'Didn\'t set attachment') );
-        $post_meta =  $post_data['post_meta'];
-
-        if ( $post_meta ):
-
-            foreach ($post_meta as $meta_key => $meta_value):
-                if (! add_post_meta($post_id, $meta_key, $meta_value, true) )
-                    update_post_meta($post_id, $meta_key, $meta_value);
-            endforeach;
-
-        endif;
-
+        
         return !!$post_id;
 
     }
