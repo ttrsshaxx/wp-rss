@@ -7,6 +7,27 @@ Author: Alain Jacomet
 Version: 1.0.0
 */
 
+
+register_activation_hook(__FILE__, 'wp_rss_activation');
+
+add_action('wp_rss_daily_fetch_event', 'wp_rss_fetch');
+
+function wp_rss_activation() {
+    wp_schedule_event(time(), 'daily', 'wp_rss_fetch_all');
+}
+
+function wp_rss_fetch_all() {
+    $rss = new RSSFeed();
+    $rss->fetch_and_save_all();
+}
+
+register_deactivation_hook(__FILE__, 'wp_rss_deactivate_event');
+
+function wp_rss_deactivate_event() {
+    wp_clear_scheduled_hook('wp_rss_fetch_all');
+}
+
+
 if (!class_exists('RSSFeed')):
 
 class RSSFeed {
