@@ -230,7 +230,7 @@ class RSSFeed {
         else:
 
             $post_data['ID'] = $post_id;
-            $post_id = wp_update_post($post_data);            
+            //$post_id = wp_update_post($post_data);            
 
         endif;
 
