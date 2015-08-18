@@ -27,6 +27,12 @@ function wp_rss_deactivate_event() {
     wp_clear_scheduled_hook('wp_rss_fetch_all');
 }
 
+if ( defined('WP_DEBUG_LOG') && WP_DEBUG_LOG === true && WP_DEBUG === true ) {
+    add_action('rsff_log', function($message) {
+        error_log($message);
+    });
+}
+
 
 if (!class_exists('RSSFeed')):
 
@@ -72,11 +78,11 @@ class RSSFeed {
         // Fetch the settings and place them as an instance variable later use
         $this->settings = $this->getConfiguration();
 
-        $this->log('Initialized RSSFeed object');
+        $this->log('WP-RSS: Initialized RSSFeed object');
     }
 
     public function __destruct() {
-        $this->log('Destructing RSSFeed object');
+        $this->log('WP-RSS: Destructing RSSFeed object');
     }
 
 
@@ -112,9 +118,9 @@ class RSSFeed {
         $return = delete_option($option);
 
         if ($return == true)
-            $this->log('Cleared all settings');
+            $this->log('WP-RSS: Cleared all settings');
         else
-            $this->log('Failed to clear settings');
+            $this->log('WP-RSS: Failed to clear settings');
 
         return $return;
     }
@@ -156,9 +162,9 @@ class RSSFeed {
         $return = array_push($this->settings['feeds'], $feed_uri);
 
         if ($return > 0)
-            $this->log('Successfully added ' . $feed_uri);
+            $this->log('WP-RSS: Successfully added ' . $feed_uri);
         else
-            $this->log('Failure to add feed');
+            $this->log('WP-RSS: Failure to add feed');
 
         $this->saveAndExit();
 
@@ -206,9 +212,9 @@ class RSSFeed {
         $return = array_splice($this->settings['feeds'], $feed_index, 1);
 
         if (is_array($return))
-            $this->log('Successfully removed ' . $feed_uri);
+            $this->log('WP-RSS: Successfully removed ' . $feed_uri);
         else
-            $this->log('Failure to remove feed');
+            $this->log('WP-RSS: Failure to remove feed');
 
         $this->saveAndExit();
 
@@ -227,7 +233,7 @@ class RSSFeed {
 
         $return = apply_filters('rssff_fetch_feed', $return, $feed_uri, $settings);
 
-        $this->log("Fetched " . count($return) . " posts.");
+        $this->log("WP-RSS: Fetched " . count($return) . " posts.");
 
         return $return;
     }
@@ -239,6 +245,7 @@ class RSSFeed {
      * @return int
      */
     public function post($post_data) {
+        $saved_image = false;
 
         $post_id = $this->find_managed_post($post_data['post_meta']['_rssff_id']);
 
@@ -273,7 +280,7 @@ class RSSFeed {
 
         endif;
 
-        $this->log("Updated post id: $post_id. " . ($saved_image ? "Attachment id: " . $attachment_id: 'Didn\'t set attachment') );
+        $this->log("WP-RSS: Updated post id: $post_id. " . ($saved_image ? "Attachment id: " . $attachment_id: 'Didn\'t set attachment') );
         
         return !!$post_id;
 
@@ -288,6 +295,7 @@ class RSSFeed {
     public function fetch_and_save($feed_index) {
         $posts = $this->fetch($feed_index);
 
+        $this->log('WP-RSS: Fetch single: ' . $feed_index);
         foreach ($posts as $post):
             if (!$this->post($post))
                 return false;
@@ -303,6 +311,7 @@ class RSSFeed {
     public function fetch_and_save_all() {
         $feeds = $this->get_feeds();
 
+        $this->log('WP-RSS: Fetch all posts');
         foreach (array_keys($feeds) as $feed_index):
             if (! $this->fetch_and_save($feed_index))
                 return false;
